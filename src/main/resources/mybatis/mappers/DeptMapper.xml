@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.tarena.ht.mapper.DeptMapper">
+
+	<!-- 查询全部部门 -->
+	<select id="findAll" resultMap="deptRM">
+		select * 
+		from dept_p d
+		left join
+		(select dept_id p_id,dept_name p_name 
+		from dept_p
+		) p
+		on d.parent_id=p.p_id
+		order by dept_id
+		
+	</select>
+	
+	<!-- 查询对应id部门 -->
+	<select id="findOne" resultMap="deptRM">
+		select * 
+		from (select * from dept_p where dept_id=#{deptId}) d
+		left join (select dept_id p_id,dept_name p_name from dept_p) p
+		on d.parent_id=p.p_id
+	</select>
+	
+	<!-- 查询除当前部门外组成的所有上级部门集合 -->
+	<select id="findParents" resultType="Dept">
+		select * from dept_p
+	</select>
+	
+	<resultMap type="Dept" id="deptRM" autoMapping="true">
+		<id column="dept_id" property="deptId"></id>
+		<association property="parentDept" javaType="Dept">
+			<id column="p_id" property="deptId"/>
+			<result column="p_name" property="deptName"/>
+		</association>
+	</resultMap>
+	
+	<!-- 修改部门状态 -->
+	<update id="updateState">
+		update dept_p set state=#{state} where dept_id in(
+		<foreach collection="deptIds" item="deptId" separator=",">
+			#{deptId}
+		</foreach>
+		)
+	</update>
+	
+	<!-- 修改部门信息 -->
+	<update id="updateDept">
+		update dept_p 
+		set dept_name=#{deptName},
+			parent_id=#{parentDept.deptId},
+			state=#{state}
+		where dept_id=#{deptId} 
+	</update>
+	
+	<!-- 增加部门 -->
+	<insert id="saveDept">
+		insert into dept_p(dept_id,dept_name,parent_id,state)
+		values(#{deptId},#{deptName},#{parentDept.deptId},#{state})
+	</insert>
+	
+	<!-- 删除部门 -->
+	<delete id="deleteDepts">
+		delete from dept_p where dept_id in(
+		<foreach collection="array" item="deptId" separator=",">
+			#{deptId}
+		</foreach>
+		)
+	</delete>
+	
+</mapper>

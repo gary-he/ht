@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.tarena.ht.mapper.RoleMapper">
+
+	<!-- 查询所有角色 -->
+	<select id="findAll" resultType="Role">
+		select * from role_p order by order_no
+	</select>
+	
+	<!-- 查询对应角色 -->
+	 <select id="findOne" resultType="Role">
+	 	select * from role_p where role_id=#{roleId}
+	 </select>
+	
+	<!-- 查询对应用户的全部角色id -->
+	<select id="findUserRoleId" resultType="string">
+		select role_id from role_user_p where user_id=#{userId}
+	</select>
+	
+	<!-- 增加角色 -->
+	<insert id="insertRole">
+		insert into role_p values(
+			#{roleId},
+			#{name},
+			#{remarks},
+			#{orderNo},
+			#{createBy,jdbcType=VARCHAR},
+			#{createDept,jdbcType=VARCHAR},
+			#{createTime,jdbcType=DATE},
+			#{updateBy,jdbcType=VARCHAR},
+			#{updateTime,jdbcType=DATE}
+		)
+	</insert>
+	
+	<!-- 更新角色 -->
+	<update id="updateRole">
+		update role_p set 
+			name=#{name},
+			remarks=#{remarks},
+			order_no=#{orderNo},
+			update_by=#{updateBy,jdbcType=VARCHAR},
+			update_time=#{updateTime,jdbcType=DATE}
+		where role_id=#{roleId}
+	</update>
+	
+	<!-- 删除角色 -->
+	<update id="deleteRole">
+		delete from role_p where role_id in(
+			<foreach collection="array" item="roleId" separator=",">
+				#{roleId}
+			</foreach>
+		)
+	</update>
+</mapper>

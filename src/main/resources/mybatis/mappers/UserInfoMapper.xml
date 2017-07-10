@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.tarena.ht.mapper.UserInfoMapper">
+
+	<!-- 查询所有用户信息 -->
+	<select id="findAll" resultMap="userInfoRM">
+		select *
+        from user_info_p u
+        left join (select user_info_id m_id,name m_name from user_info_p) m
+        on u.manager_id=m.m_id
+	</select>
+	
+	<!-- 查询除当前用户外组成的所有上级领导集合 -->
+	<select id="findManagers" resultType="UserInfo">
+		select * from user_info_p where user_info_id not in #{userId}
+	</select>
+	
+	<resultMap type="UserInfo" id="userInfoRM" autoMapping="true">
+		<id column="user_info_id" property="userInfoId"/>
+		
+		<association property="manager" javaType="UserInfo">
+			<id column="m_id" property="userInfoId"/>
+			<result column="m_name" property="name"/>
+		</association>
+	</resultMap>
+
+	
+	<!-- 增加用户信息 -->
+	<insert id="insertUserInfo">
+		insert into user_info_p values(
+			#{userInfoId},
+			#{name},
+			#{cardNo,jdbcType=VARCHAR},
+			#{manager.userInfoId,jdbcType=VARCHAR},
+			#{joinDate,jdbcType=DATE},
+			#{salary,jdbcType=DOUBLE},
+			#{birthday,jdbcType=DATE},
+			#{gender,jdbcType=VARCHAR},
+			#{station,jdbcType=VARCHAR},
+			#{telephone,jdbcType=VARCHAR},
+			#{userLevel,jdbcType=CHAR},
+			#{remark,jdbcType=VARCHAR},
+			#{orderNo,jdbcType=INTEGER},
+			#{createBy,jdbcType=VARCHAR},
+			#{createDept,jdbcType=VARCHAR},
+			#{createTime,jdbcType=DATE},
+			#{updateBy,jdbcType=VARCHAR},
+			#{updateTime,jdbcType=DATE}
+		)
+	</insert>
+	
+	<!-- 修改用户信息 -->
+	<update id="updateUserInfo">
+		update user_info_p set
+			name=#{name},
+			card_no=#{cardNo,jdbcType=VARCHAR},
+			manager_id=#{manager.userInfoId,jdbcType=VARCHAR},
+			join_date=#{joinDate,jdbcType=DATE},
+			salary=#{salary,jdbcType=DOUBLE},
+			birthday=#{birthday,jdbcType=DATE},
+			gender=#{gender,jdbcType=VARCHAR},
+			station=#{station,jdbcType=VARCHAR},
+			telephone=#{telephone,jdbcType=VARCHAR},
+			user_level=#{userLevel,jdbcType=CHAR},
+			remark=#{remark,jdbcType=VARCHAR},
+			order_no=#{orderNo,jdbcType=INTEGER},
+			create_by=#{createBy,jdbcType=VARCHAR},
+			create_dept=#{createDept,jdbcType=VARCHAR},
+			create_time=#{createTime,jdbcType=DATE},
+			update_by=#{updateBy,jdbcType=VARCHAR},
+			update_time=#{updateTime,jdbcType=DATE}
+		where user_info_id=#{userInfoId}
+	</update>
+	
+	<!-- 删除指定用户信息记录 -->
+	<delete id="deleteUserInfo">
+		delete from user_info_p where user_info_id in(
+			<foreach collection="array" item="userId" separator=",">
+				#{userId}
+			</foreach>
+		)
+	</delete>
+</mapper>
